@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integrationsarchitektur &amp; Neurobiologie — Praxis-Transfer für den SAM Verein</title>
+<meta name="description" content="Ein evidenzbasiertes Praxis-Modul für den SAM Verein (Bad Belzig): systemkybernetische und neurobiologische Grundlagen der Integrationsarbeit, kritisch geprüft und in fünf operative Hebel übersetzt.">
+<meta property="og:title" content="Integrationsarchitektur & Neurobiologie — SAM Verein">
+<meta property="og:description" content="Wie Stress, Verwaltung und Spracherwerb zusammenhängen — und was daraus praktisch folgt. Ein Werkzeug für die tägliche Vereinsarbeit in Bad Belzig.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#F7F3EC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{
+  /* ===== Basis — Klinisch-editorielle Helligkeit ===== */
+  --alabaster: #F7F3EC;
+  --sand: #EEE4D3;
+  --sand-deep: #E4D6BE;
+  --sand-line: #DCCBA8;
+  --slate: #262B33;
+  --slate-soft: #3C4249;
+  --slate-faint: #474A4E;
+
+  /* ===== Epistemische Farbcodierung (AAA-geprüft, s. Validierungsnotiz im Quelltext) ===== */
+  --fakt-bg: #DCEBE1;
+  --fakt-text: #204A34;
+  --fakt-line: #9DC4AE;
+
+  --modell-bg: #F1E3C8;
+  --modell-text: #5C3A0C;
+  --modell-line: #D6B679;
+
+  --umstritten-bg: #F3DFD8;
+  --umstritten-text: #73301F;
+  --umstritten-line: #DDAA97;
+
+  --gold: #8A5F24;
+  --gold-text: #634309;
+  --gold-soft: #E7D2A8;
+
+  --focus-ring: #1D4ED8;
+
+  --serif: 'Fraunces', ui-serif, Georgia, serif;
+  --sans: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*{ box-sizing: border-box; }
+html{ scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior: auto; }
+  *, *::before, *::after{
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body{
+  background: var(--alabaster);
+  color: var(--slate);
+  font-family: var(--sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-display{ font-family: var(--serif); }
+.font-mono{ font-family: var(--mono); }
+
+/* Sichtbarer Fokus-Ring — WCAG 2.4.7 */
+:focus-visible{
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+a, button{ cursor: pointer; }
+
+.skip-link{
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--slate);
+  color: var(--alabaster);
+  padding: 0.9rem 1.4rem;
+  font-weight: 700;
+  border-radius: 0 0 0.5rem 0;
+}
+.skip-link:focus{ left: 0; }
+
+/* Scroll-Fortschrittsleiste */
+#scroll-progress{
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold), var(--fakt-line));
+  z-index: 60;
+  transition: width 0.1s linear;
+}
+@media (prefers-reduced-motion: reduce){ #scroll-progress{ transition: none; } }
+
+/* ===== Epistemische Chips ===== */
+.chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.2rem 0.6rem 0.22rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  vertical-align: middle;
+  position: relative;
+}
+.chip:focus-visible{ outline-offset: 2px; }
+.chip-fakt{ background: var(--fakt-bg); color: var(--fakt-text); border-color: var(--fakt-line); }
+.chip-modell{ background: var(--modell-bg); color: var(--modell-text); border-color: var(--modell-line); }
+.chip-umstritten{ background: var(--umstritten-bg); color: var(--umstritten-text); border-color: var(--umstritten-line); }
+.chip-dot{ width: 0.4rem; height: 0.4rem; border-radius: 50%; background: currentColor; flex: none; }
+
+.chip-pop{
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  width: max-content;
+  max-width: 17rem;
+  background: var(--slate);
+  color: var(--alabaster);
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.45;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.6rem;
+  box-shadow: 0 12px 28px -8px rgba(38,43,51,0.35);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out);
+  z-index: 40;
+  text-align: left;
+  white-space: normal;
+}
+.chip-pop::after{
+  content: "";
+  position: absolute;
+  top: 100%; left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--slate);
+}
+.chip.is-open .chip-pop,
+.chip:focus-visible .chip-pop{
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== Reveal-on-scroll ===== */
+.reveal{ opacity: 0; transform: translateY(18px); transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out); }
+.reveal.is-visible{ opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce){
+  .reveal{ opacity: 1; transform: none; transition: none; }
+}
+
+/* ===== Glas-Panels ===== */
+.panel{
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(228, 214, 190, 0.9);
+  border-radius: 1.1rem;
+}
+
+/* ===== Bruchnaht-Trenner ===== */
+.fracture-divider{ display:block; width:100%; height:auto; }
+
+/* ===== Hero-Canvas ===== */
+#hero-canvas{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0.55;
+}
+
+/* ===== Akkordeon (Hebel) ===== */
+.lever-trigger[aria-expanded="true"] .lever-chevron{ transform: rotate(180deg); }
+.lever-chevron{ transition: transform 0.25s var(--ease-out); flex: none; }
+.lever-panel{
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s var(--ease-out);
+}
+.lever-panel > div{ overflow: hidden; }
+.lever-item[data-open="true"] .lever-panel{ grid-template-rows: 1fr; }
+@media (prefers-reduced-motion: reduce){
+  .lever-chevron, .lever-panel{ transition: none; }
+}
+
+/* ===== Exoskelett-Dialog ===== */
+dialog#exoskelett{
+  border: none;
+  border-radius: 1.25rem;
+  padding: 0;
+  max-width: 46rem;
+  width: min(92vw, 46rem);
+  max-height: 85vh;
+  color: var(--slate);
+  background: var(--alabaster);
+  box-shadow: 0 30px 80px -20px rgba(38,43,51,0.45);
+}
+dialog#exoskelett::backdrop{
+  background: rgba(38,43,51,0.55);
+  backdrop-filter: blur(3px);
+}
+dialog#exoskelett[open]{ animation: dlg-in 0.28s var(--ease-out); }
+@keyframes dlg-in{ from{ opacity:0; transform: scale(0.97) translateY(8px);} to{ opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce){ dialog#exoskelett[open]{ animation: none; } }
+
+.tab-btn[aria-selected="true"]{
+  color: var(--slate);
+  border-color: var(--gold);
+  background: var(--sand);
+}
+.tab-btn{
+  color: var(--slate-faint);
+  border-bottom: 3px solid transparent;
+}
+
+/* Simple SVG bar chart bars animate in width, guarded by reduced motion */
+.bar-fill{ transition: width 1s var(--ease-out); }
+@media (prefers-reduced-motion: reduce){ .bar-fill{ transition: none; } }
+
+::selection{ background: var(--gold-soft); color: var(--slate); }
+</style>
+</head>
+<body class="antialiased">
+<a href="#main" class="skip-link">Zum Hauptinhalt springen</a>
+<div id="scroll-progress"></div>
+
+<!-- ============ HEADER ============ -->
+<header class="fixed top-0 inset-x-0 z-50 backdrop-blur-md" style="background: rgba(247,243,236,0.82); border-bottom: 1px solid var(--sand-line);">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
+    <a href="#main" class="flex items-center gap-3 group" aria-label="Zum Seitenanfang">
+      <span class="font-display font-semibold text-lg sm:text-xl" style="color:var(--slate);">SAM&nbsp;Verein</span>
+      <span class="hidden sm:inline font-mono text-xs px-2 py-0.5 rounded-full" style="background:var(--sand); color:var(--slate-soft); border:1px solid var(--sand-line);">Praxis-Modul&nbsp;01</span>
+    </a>
+    <nav aria-label="Abschnitte dieser Seite" class="hidden md:flex items-center gap-6 font-mono text-xs uppercase tracking-wide" style="color:var(--slate-soft);">
+      <a href="#diagnose" class="hover:opacity-70">Diagnose</a>
+      <a href="#falsifikation" class="hover:opacity-70">Falsifikation</a>
+      <a href="#hebel" class="hover:opacity-70">Fünf Hebel</a>
+    </nav>
+    <button type="button" id="open-exoskelett-nav" class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full transition-colors" style="background:var(--slate); color:var(--alabaster);">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      Exoskelett
+    </button>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ============ HERO ============ -->
+<section class="relative overflow-hidden pt-32 pb-24 sm:pt-40 sm:pb-32" style="background: linear-gradient(180deg, var(--sand) 0%, var(--alabaster) 78%);">
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
+  <div class="relative max-w-4xl mx-auto px-5 sm:px-8">
+    <p class="font-mono text-xs sm:text-sm uppercase tracking-[0.18em] mb-6" style="color:var(--gold-text);">
+      Systemkybernetik&nbsp;· Neurobiologie&nbsp;· Bad&nbsp;Belzig
+    </p>
+    <h1 class="font-display font-semibold leading-[1.05] mb-8" style="font-size: clamp(2.3rem, 6vw, 4.1rem); color: var(--slate);">
+      Integrationsarchitektur &amp;<br class="hidden sm:block"> Neurobiologie
+    </h1>
+    <p class="font-display italic mb-10" style="font-size: clamp(1.15rem, 2.4vw, 1.5rem); color: var(--slate-soft); max-width: 42rem;">
+      Ein evidenzbasierter Praxis-Transfer für den SAM&nbsp;Verein
+    </p>
+    <div class="max-w-2xl space-y-4" style="color: var(--slate-soft); font-size: 1.05rem;">
+      <p>Formale Integration — Spracherwerb, Behördengänge, Arbeitsmarktzugang — setzt ein Nervensystem voraus, das lernen <em>kann</em>. Das ist keine Frage von Motivation. Es ist eine Frage der Kapazität eines Organs: des präfrontalen Kortex, der unter anhaltendem, unkontrollierbarem Stress messbar schlechter arbeitet — bei jedem Menschen, unabhängig von Herkunft.</p>
+      <p>Dieses Modul übersetzt drei Evidenzstränge — Stressneurobiologie, internationale Verwaltungspraxis und deutsche Arbeitsmarktdaten — in fünf konkrete Hebel für die tägliche Arbeit vor Ort. Jede Aussage ist epistemisch markiert: <button type="button" class="chip chip-fakt" data-chip="hero-fakt"><span class="chip-dot"></span>Fakt<span class="chip-pop" role="tooltip">Durch die zitierte Literatur direkt belegt.</span></button> für Belegtes, <button type="button" class="chip chip-modell" data-chip="hero-modell"><span class="chip-dot"></span>Modell<span class="chip-pop" role="tooltip">Plausible Übertragung oder Schätzung — nicht direkt gemessen.</span></button> für Übertragungen und Schätzungen, <button type="button" class="chip chip-umstritten" data-chip="hero-umstritten"><span class="chip-dot"></span>Umstritten<span class="chip-pop" role="tooltip">Fachlich diskutiert, ohne Konsens.</span></button> für offene Fragen.</p>
+    </div>
+    <div class="mt-12 flex flex-wrap items-center gap-4">
+      <a href="#diagnose" class="inline-flex items-center gap-2 font-semibold px-6 py-3.5 rounded-full transition-transform hover:-translate-y-0.5" style="background:var(--slate); color:var(--alabaster);">
+        Zur Diagnose
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="#hebel" class="inline-flex items-center gap-2 font-semibold px-6 py-3.5 rounded-full border transition-colors" style="border-color: var(--sand-line); color:var(--slate);">
+        Direkt zu den 5 Hebeln
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Fracture-Seam Divider -->
+<svg class="fracture-divider" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="margin-top:-1px;">
+  <path d="M0,24 L120,24 L145,6 L175,38 L210,14 L240,30 L280,24 L1440,24 L1440,48 L0,48 Z" fill="var(--alabaster)"></path>
+  <path d="M0,24 L120,24 L145,6 L175,38 L210,14 L240,30 L280,24 L1440,24" fill="none" stroke="var(--sand-line)" stroke-width="1.5"></path>
+</svg>
+
+<!-- ============ SECTION: DIAGNOSE ============ -->
+<section id="diagnose" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--alabaster);">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal mb-16 max-w-2xl">
+      <p class="font-mono text-xs uppercase tracking-[0.18em] mb-4" style="color:var(--gold-text);">01 — Diagnose</p>
+      <h2 class="font-display font-semibold mb-5" style="font-size: clamp(1.9rem, 4vw, 2.8rem); color:var(--slate);">Die harten Engpässe</h2>
+      <p style="color:var(--slate-soft); font-size:1.05rem;">Drei messbare Reibungsverluste, bevor irgendeine Maßnahme überhaupt ansetzen kann: eine zeitliche, eine strukturelle und eine neurobiologische.</p>
+    </div>
+
+    <!-- 1a: Fiskalischer Lag -->
+    <div class="reveal grid md:grid-cols-5 gap-8 md:gap-12 items-start mb-24">
+      <div class="md:col-span-2">
+        <h3 class="font-display font-semibold text-2xl mb-3" style="color:var(--slate);">Der fiskalische Lag</h3>
+        <p class="mb-4" style="color:var(--slate-soft);">Die Zeitspanne bis zum Break-Even-Punkt, ab dem eine zugewanderte Person in der kumulierten Summe mehr an Steuern und Abgaben einzahlt, als sie an Vorlaufkosten (Unterbringung, Integrationskurse, Transferleistungen) verursacht hat.</p>
+        <button type="button" class="chip chip-modell mb-3" data-chip="fiskal">
+          <span class="chip-dot"></span>Modell
+          <span class="chip-pop" role="tooltip">Ergebnis eines finanzökonomischen Simulationsmodells mit expliziten Annahmen — kein gemessener Wert.</span>
+        </button>
+        <p class="text-sm" style="color:var(--slate-faint);">Prof. Dr. Volker Brühl (Center for Financial Studies, Goethe-Universität Frankfurt) berechnete 2016 für die Zuzugskohorte 2015 einen fiskalischen Break-Even um das Jahr 2031 — je nach Szenario auch später. Andere Institute kommen mit anderen Annahmen (z. B. zur Generationenbilanzierung) zu abweichenden Zeiträumen; die Größenordnung von zehn bis über fünfzehn Jahren gilt in der Forschung als robust, die exakte Zahl nicht.</p>
+      </div>
+      <div class="md:col-span-3">
+        <div class="panel p-6 sm:p-8">
+          <svg viewBox="0 0 560 200" role="img" aria-labelledby="fiskal-title fiskal-desc" class="w-full h-auto">
+            <title id="fiskal-title">Zeitstrahl zum fiskalischen Break-Even</title>
+            <desc id="fiskal-desc">Von der Ankunft 2015/2016 über konsumtive Vorlaufkosten bis zum modellierten Break-Even um 2031, etwa 15 bis 16 Jahre später.</desc>
+            <line x1="30" y1="150" x2="530" y2="150" stroke="var(--sand-line)" stroke-width="2"/>
+            <circle cx="40" cy="150" r="6" fill="var(--umstritten-text)"/>
+            <text x="40" y="180" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="var(--slate-soft)">2015/16</text>
+            <text x="40" y="130" text-anchor="middle" font-family="Atkinson Hyperlegible" font-size="12" fill="var(--slate)">Ankunft, Vorlaufkosten</text>
+            <line x1="40" y1="150" x2="500" y2="150" stroke="var(--modell-line)" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="500" cy="150" r="7" fill="var(--fakt-text)"/>
+            <text x="500" y="180" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="var(--slate-soft)">≈2031</text>
+            <text x="500" y="130" text-anchor="middle" font-family="Atkinson Hyperlegible" font-size="12" fill="var(--slate)">Modellierter Break-Even</text>
+            <text x="270" y="60" text-anchor="middle" font-family="Fraunces" font-weight="600" font-size="34" fill="var(--slate)">≈ 15–16 Jahre</text>
+            <text x="270" y="85" text-anchor="middle" font-family="Atkinson Hyperlegible" font-size="13" fill="var(--slate-faint)">Modellrechnung Brühl (2016), Kohorte 2015 — andere Institute: andere Annahmen, andere Zeiträume</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1b: Geschlechtergefälle -->
+    <div class="reveal grid md:grid-cols-5 gap-8 md:gap-12 items-start mb-24">
+      <div class="md:col-span-2">
+        <h3 class="font-display font-semibold text-2xl mb-3" style="color:var(--slate);">Das Geschlechtergefälle</h3>
+        <p class="mb-4" style="color:var(--slate-soft);">Die Erwerbsintegration Geflüchteter verläuft nicht neutral. Der entscheidende Faktor ist nicht das Geschlecht selbst, sondern ob im Haushalt ein Kind ohne Betreuungsplatz lebt.</p>
+        <button type="button" class="chip chip-fakt mb-3" data-chip="gender">
+          <span class="chip-dot"></span>Fakt
+          <span class="chip-pop" role="tooltip">IAB-BAMF-SOEP-Befragung von Geflüchteten, IAB-Presseinformationen 2024/2025.</span>
+        </button>
+        <p class="text-sm" style="color:var(--slate-faint);">Quelle: IAB-BAMF-SOEP-Panel. Die Zahlen variieren je nach Erhebungsjahr und Kohorte; hier die zuletzt veröffentlichten Werte des IAB, nicht ein einzelner interner Arbeitsstand.</p>
+      </div>
+      <div class="md:col-span-3">
+        <div class="panel p-6 sm:p-8 space-y-5">
+          <div>
+            <div class="flex justify-between text-sm mb-1.5" style="color:var(--slate);"><span>Männer, 7 Jahre nach Zuzug (Kohorte 2015)</span><span class="font-mono font-semibold">75&nbsp;%</span></div>
+            <div class="h-3 rounded-full overflow-hidden" style="background:var(--sand);"><div class="h-full rounded-full bar-fill" style="width:75%; background:var(--gold);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1.5" style="color:var(--slate);"><span>Frauen, 7 Jahre nach Zuzug (Kohorte 2015)</span><span class="font-mono font-semibold">31&nbsp;%</span></div>
+            <div class="h-3 rounded-full overflow-hidden" style="background:var(--sand);"><div class="h-full rounded-full bar-fill" style="width:31%; background:var(--umstritten-text);"></div></div>
+          </div>
+          <div class="h-px my-1" style="background:var(--sand-line);"></div>
+          <div>
+            <div class="flex justify-between text-sm mb-1.5" style="color:var(--slate);"><span>Frauen ohne Kinder im Haushalt (2024)</span><span class="font-mono font-semibold">40&nbsp;%</span></div>
+            <div class="h-3 rounded-full overflow-hidden" style="background:var(--sand);"><div class="h-full rounded-full bar-fill" style="width:40%; background:var(--gold);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1.5" style="color:var(--slate);"><span>Frauen mit Kind unter 6 Jahren (2024)</span><span class="font-mono font-semibold">21&nbsp;%</span></div>
+            <div class="h-3 rounded-full overflow-hidden" style="background:var(--sand);"><div class="h-full rounded-full bar-fill" style="width:21%; background:var(--umstritten-text);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1.5" style="color:var(--slate);"><span>Alleinerziehende Mütter, 6+ Jahre nach Zuzug</span><span class="font-mono font-semibold">16&nbsp;%</span></div>
+            <div class="h-3 rounded-full overflow-hidden" style="background:var(--sand);"><div class="h-full rounded-full bar-fill" style="width:16%; background:var(--umstritten-text);"></div></div>
+          </div>
+          <p class="text-xs pt-2" style="color:var(--slate-faint);">Beschäftigungs-/Erwerbstätigenquoten, verschiedene Erhebungsjahre. Nicht als einheitliche Zeitreihe einer einzigen Kohorte zu lesen, sondern als Beleg für ein durchgängiges Muster: Kinderbetreuung entscheidet, nicht Geschlecht per se.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1c: Ion Shunting / Stressmechanismus -->
+    <div class="reveal grid md:grid-cols-5 gap-8 md:gap-12 items-start">
+      <div class="md:col-span-2">
+        <h3 class="font-display font-semibold text-2xl mb-3" style="color:var(--slate);">Stress und Arbeitsgedächtnis</h3>
+        <p class="mb-4" style="color:var(--slate-soft);">Spracherwerb ist ohne intaktes Arbeitsgedächtnis kaum möglich. Anhaltender, unkontrollierbarer Stress beeinträchtigt genau diese Funktion — messbar, bei jedem Nervensystem.</p>
+        <button type="button" class="chip chip-fakt mb-3" data-chip="stress">
+          <span class="chip-dot"></span>Fakt <span class="chip-pop" role="tooltip">Mechanismus nach Arnsten u. a. — Katecholamin-Wirkung auf präfrontale Netzwerke.</span>
+        </button>
+        <button type="button" class="chip chip-modell mb-3" data-chip="stress-transfer">
+          <span class="chip-dot"></span>Modell <span class="chip-pop" role="tooltip">Die Übertragung „daher praktisch schwerer lernbar" ist eine plausible, aber nicht individuell gemessene Schlussfolgerung.</span>
+        </button>
+      </div>
+      <div class="md:col-span-3 panel p-6 sm:p-8">
+        <p class="mb-4" style="color:var(--slate);">Unter moderater Aktivierung feuern präfrontale Netzwerke optimal — das ist der Zustand, in dem Zuhören, Vokabeln behalten und Sätze bilden gelingt. Bei unkontrollierbarem Stress kippt das: Amygdala-gesteuerte Katecholamin-Ausschüttung überstimuliert dieselben Rezeptoren, kaliumgesteuerte Kanäle öffnen sich, ankommende Signale "verpuffen" an der Synapse, bevor sie zu einem Gedanken werden. Der präfrontale Kortex geht vorübergehend in einen reflexiven Modus über, den Amygdala und Striatum dominieren.</p>
+        <p style="color:var(--slate-soft);">Entscheidend für die Praxis: Dieser Mechanismus ist unspezifisch. Er betrifft jedes menschliche Nervensystem unter chronischem, unkontrollierbarem Stress — durch Flucht, aber ebenso durch Krieg, Verlust, häusliche Gewalt oder anhaltende Existenzangst. Er beschreibt eine <strong>Beeinträchtigung von Kapazität</strong>, keine <strong>Unfähigkeit von Personen</strong>. Individuelle Resilienz, Zeit und vor allem eine Senkung der Stressoren selbst verändern das Bild erheblich. Die Konsequenz ist praktisch, nicht diagnostisch: Bevor formale Sprachvermittlung greifen kann, muss das Stressniveau sinken.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<svg class="fracture-divider" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0,24 L1180,24 L1210,42 L1245,10 L1280,24 L1440,24 L1440,48 L0,48 Z" fill="var(--sand)"></path>
+  <path d="M0,24 L1180,24 L1210,42 L1245,10 L1280,24 L1440,24" fill="none" stroke="var(--sand-line)" stroke-width="1.5"></path>
+</svg>
+
+<!-- ============ SECTION: FALSIFIKATION ============ -->
+<section id="falsifikation" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal mb-16 max-w-2xl">
+      <p class="font-mono text-xs uppercase tracking-[0.18em] mb-4" style="color:var(--umstritten-text);">02 — Falsifikation</p>
+      <h2 class="font-display font-semibold mb-5" style="font-size: clamp(1.9rem, 4vw, 2.8rem); color:var(--slate);">Der Realitätscheck</h2>
+      <p style="color:var(--slate-soft); font-size:1.05rem;">Eine Analyse, die ihre eigenen Lösungsvorschläge nicht der Widerlegung aussetzt, ist keine Analyse. Drei naheliegende Antworten — geprüft und für unzureichend befunden.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <!-- Karte 1: Piktogramme -->
+      <article class="reveal panel p-7 flex flex-col">
+        <button type="button" class="chip chip-fakt self-start mb-4" data-chip="pikto">
+          <span class="chip-dot"></span>Fakt <span class="chip-pop" role="tooltip">Mehrere unabhängige Studien zur Piktogramm-Verständlichkeit.</span>
+        </button>
+        <h3 class="font-display font-semibold text-xl mb-3" style="color:var(--slate);">Die Grenze der Bildsprache</h3>
+        <p class="text-sm mb-4 flex-1" style="color:var(--slate-soft);">Standardisierte, in westlichen Ländern entwickelte Piktogramme (USP/FIP-Systeme) gelten als global verständlich. Mehrere unabhängige Studien widerlegen das: In einer Untersuchung auf den Philippinen erreichten nur 17 von 108 geprüften Symbolen die 85-Prozent-Verständlichkeitsschwelle. Studien in Portugal und Südafrika zeigen ähnliche kulturelle Verzerrungen — etwa bei Uhr-Zifferblättern oder Körperdarstellungen.</p>
+        <p class="text-xs font-semibold" style="color:var(--umstritten-text);">Konsequenz: Importierte Symbolsysteme ohne lokale Validierung erzeugen genau die Verwirrung, die sie beseitigen sollen.</p>
+      </article>
+
+      <!-- Karte 2: Job-Turbo -->
+      <article class="reveal panel p-7 flex flex-col" style="transition-delay:0.08s;">
+        <button type="button" class="chip chip-fakt self-start mb-4" data-chip="jobturbo">
+          <span class="chip-dot"></span>Fakt <span class="chip-pop" role="tooltip">Falkenhain &amp; Bernhard (IAB), Wirtschaftsdienst 4/2026, Online-Jobcenter-Befragung 2025.</span>
+        </button>
+        <h3 class="font-display font-semibold text-xl mb-3" style="color:var(--slate);">Der Job-Turbo aus Sicht der Praxis</h3>
+        <div class="space-y-2 mb-4">
+          <div>
+            <div class="flex justify-between text-xs mb-1" style="color:var(--slate);"><span>„eher/sinnvoll" bis „sehr sinnvoll"</span><span class="font-mono">21&nbsp;%</span></div>
+            <div class="h-2.5 rounded-full overflow-hidden" style="background:var(--sand);"><div class="h-full rounded-full bar-fill" style="width:21%; background:var(--gold);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1" style="color:var(--slate);"><span>„eher nicht" bis „überhaupt nicht sinnvoll"</span><span class="font-mono">62&nbsp;%</span></div>
+            <div class="h-2.5 rounded-full overflow-hidden" style="background:var(--sand);"><div class="h-full rounded-full bar-fill" style="width:62%; background:var(--umstritten-text);"></div></div>
+          </div>
+        </div>
+        <p class="text-sm flex-1" style="color:var(--slate-soft);">Über 1.150 befragte Vermittlungsfachkräfte in Jobcentern lehnen das Programm mehrheitlich ab. Nur 13&nbsp;% sehen genug offene Stellen für Menschen mit geringen Deutschkenntnissen, nur 20&nbsp;% gute Förderinstrumente. 59&nbsp;% benennen fehlende Kinderbetreuung explizit als Vermittlungshemmnis.</p>
+        <p class="text-xs font-semibold" style="color:var(--umstritten-text);">Konsequenz: Mehr Termindichte ohne mehr Ressourcen erhöht Verwaltungsaufwand, nicht Vermittlungserfolg.</p>
+      </article>
+
+      <!-- Karte 3: Schweizer Modell -->
+      <article class="reveal panel p-7 flex flex-col" style="transition-delay:0.16s;">
+        <button type="button" class="chip chip-umstritten self-start mb-4" data-chip="schweiz">
+          <span class="chip-dot"></span>Umstritten <span class="chip-pop" role="tooltip">Verfahrensdauer ist Fakt, die Bewertung der Folgen ist fachlich umstritten.</span>
+        </button>
+        <h3 class="font-display font-semibold text-xl mb-3" style="color:var(--slate);">Die Grenze der Beschleunigung</h3>
+        <p class="text-sm mb-4 flex-1" style="color:var(--slate-soft);">Die Schweiz entschied Asylverfahren seit 2019 in der Regel innerhalb von 140&nbsp;Tagen inklusive Rechtsmitteln — ein oft zitiertes Effizienzvorbild. UNHCR und der Schweizerische Flüchtlingshilfe-Rat kritisieren jedoch: Die enge Taktung erschwert den Aufbau von Vertrauen, das nötig ist, um über Trauma, geschlechtsspezifische Gewalt oder Menschenhandel zu berichten — und verkürzt Rechtsmittelfristen so stark, dass ein Anwaltswechsel nach negativem Bescheid faktisch kaum mehr möglich ist.</p>
+        <p class="text-xs font-semibold" style="color:var(--umstritten-text);">Konsequenz: Systemische Entlastung und individueller Rechtsschutz stehen hier in echtem Zielkonflikt — nicht auflösbar durch Verwaltungslogik allein.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION: FÜNF HEBEL ============ -->
+<section id="hebel" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--alabaster);">
+  <div class="max-w-4xl mx-auto">
+    <div class="reveal mb-14 max-w-2xl">
+      <p class="font-mono text-xs uppercase tracking-[0.18em] mb-4" style="color:var(--gold-text);">03 — Praxis-Transfer</p>
+      <h2 class="font-display font-semibold mb-5" style="font-size: clamp(1.9rem, 4vw, 2.8rem); color:var(--slate);">Fünf operative Hebel für Bad&nbsp;Belzig</h2>
+      <p style="color:var(--slate-soft); font-size:1.05rem;">Kein Rettungsnarrativ, keine Opferrolle — der SAM&nbsp;Verein senkt als kybernetischer Moderator institutionelle Reibung und ermöglicht biologische Regulation. Fünf Ansatzpunkte, sofort umsetzbar.</p>
+    </div>
+
+    <div id="lever-accordion" class="reveal space-y-4">
+
+      <!-- Hebel 1 -->
+      <div class="lever-item panel overflow-hidden" data-open="false">
+        <h3 class="m-0">
+          <button type="button" class="lever-trigger w-full flex items-center gap-4 text-left px-6 py-5" aria-expanded="false" aria-controls="lever-panel-1" id="lever-btn-1">
+            <span class="font-mono text-xs px-2.5 py-1 rounded-full flex-none" style="background:var(--sand); color:var(--slate-soft);">01</span>
+            <span class="font-display font-semibold flex-1" style="font-size:1.15rem; color:var(--slate);">Co-kreierte, hyperlokale Piktogramm-Architektur</span>
+            <svg class="lever-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="var(--slate)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </h3>
+        <div class="lever-panel" id="lever-panel-1" role="region" aria-labelledby="lever-btn-1">
+          <div>
+            <div class="px-6 pb-6 pt-1" style="color:var(--slate-soft);">
+              <p class="mb-3">Kein top-down eingekauftes Beschilderungssystem. Stattdessen ein „Visual Onboarding Lab" in der Gemeinschaftsunterkunft Weitzgrunder Weg: Piktogramme für Hausordnung, Mülltrennung, Ruhezeiten, Brandschutz und Erste Hilfe werden gemeinsam mit Bewohner:innen — unter Einbindung von Multiplikator:innen der größten Herkunftsgruppen — entworfen und direkt vor Ort auf Verständlichkeit getestet.</p>
+              <ul class="list-disc pl-5 space-y-1.5">
+                <li>Entwurfsworkshop mit 3–5 Bewohner:innen pro Sprachgruppe, moderiert, kein Verwaltungsvokabular.</li>
+                <li>Jedes Symbol wird vor Ort laut gedacht getestet: „Was bedeutet das für dich?" — erst bei eindeutiger Übereinstimmung wird es Standard.</li>
+                <li>Ergebnis wird laminiert, mehrsprachig hinterlegt und bei Bedarf nachjustiert, kein einmaliges Projekt.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hebel 2 -->
+      <div class="lever-item panel overflow-hidden" data-open="false">
+        <h3 class="m-0">
+          <button type="button" class="lever-trigger w-full flex items-center gap-4 text-left px-6 py-5" aria-expanded="false" aria-controls="lever-panel-2" id="lever-btn-2">
+            <span class="font-mono text-xs px-2.5 py-1 rounded-full flex-none" style="background:var(--sand); color:var(--slate-soft);">02</span>
+            <span class="font-display font-semibold flex-1" style="font-size:1.15rem; color:var(--slate);">Somatisch-kognitive Schutzräume</span>
+            <svg class="lever-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="var(--slate)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </h3>
+        <div class="lever-panel" id="lever-panel-2" role="region" aria-labelledby="lever-btn-2">
+          <div>
+            <div class="px-6 pb-6 pt-1" style="color:var(--slate-soft);">
+              <p class="mb-3">Überbelegung und dauerhafter Lärmpegel halten das vegetative Nervensystem im Aktivierungsmodus. Reizarme Zonen in Unterkünften oder Vereinsräumen senken diese Last gezielt, bevor Lernen überhaupt angesetzt wird.</p>
+              <ul class="list-disc pl-5 space-y-1.5">
+                <li>Feste Regel: keine ungedämpften Smartphone-Töne, kein grelles Licht, keine lauten Telefonate in der Zone.</li>
+                <li>Akustische Dämpfung mit einfachen Mitteln (Teppich, Vorhänge, Sitzkissen statt Hallräume).</li>
+                <li>Reserviert für Sprach-Selbststudium und das Bearbeiten komplexer Behördenpost — nicht als Aufenthaltsraum zweckentfremdet.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hebel 3 -->
+      <div class="lever-item panel overflow-hidden" data-open="false">
+        <h3 class="m-0">
+          <button type="button" class="lever-trigger w-full flex items-center gap-4 text-left px-6 py-5" aria-expanded="false" aria-controls="lever-panel-3" id="lever-btn-3">
+            <span class="font-mono text-xs px-2.5 py-1 rounded-full flex-none" style="background:var(--sand); color:var(--slate-soft);">03</span>
+            <span class="font-display font-semibold flex-1" style="font-size:1.15rem; color:var(--slate);">Peer-to-Peer-Kinderbetreuungs-Kompensation</span>
+            <svg class="lever-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="var(--slate)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </h3>
+        <div class="lever-panel" id="lever-panel-3" role="region" aria-labelledby="lever-btn-3">
+          <div>
+            <div class="px-6 pb-6 pt-1" style="color:var(--slate-soft);">
+              <p class="mb-3">Der am robustesten belegte Hebel (siehe Diagnose): Fehlende Kita-Plätze sind der zentrale Flaschenhals der Erwerbsintegration von Müttern. Ohne kurzfristig neue Kita-Plätze schaffen zu können, organisiert der SAM&nbsp;Verein eine strukturierte Betreuungs-Rotation innerhalb der Unterkünfte.</p>
+              <ul class="list-disc pl-5 space-y-1.5">
+                <li>Kohorten-Prinzip: Während Kohorte A Kurse oder Jobcenter-Termine wahrnimmt, übernimmt Kohorte B die Kinderbetreuung vor Ort.</li>
+                <li>Logistische, pädagogische und aufsichtsrechtliche Begleitung durch den Verein — keine informelle Grauzone.</li>
+                <li>Erfolgsmaß: gestiegene Kursteilnahme und Terminwahrnehmung der beteiligten Mütter, laufend erfasst.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hebel 4 -->
+      <div class="lever-item panel overflow-hidden" data-open="false">
+        <h3 class="m-0">
+          <button type="button" class="lever-trigger w-full flex items-center gap-4 text-left px-6 py-5" aria-expanded="false" aria-controls="lever-panel-4" id="lever-btn-4">
+            <span class="font-mono text-xs px-2.5 py-1 rounded-full flex-none" style="background:var(--sand); color:var(--slate-soft);">04</span>
+            <span class="font-display font-semibold flex-1" style="font-size:1.15rem; color:var(--slate);">Isomorphes Prozess-Mapping für das Jobcenter&nbsp;MAIA</span>
+            <svg class="lever-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="var(--slate)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </h3>
+        <div class="lever-panel" id="lever-panel-4" role="region" aria-labelledby="lever-btn-4">
+          <div>
+            <div class="px-6 pb-6 pt-1" style="color:var(--slate-soft);">
+              <p class="mb-3">Der Unterschied zwischen Hauptantrag, Anlage KI und Anlage EK ist für viele Klient:innen sprachlich wie systemisch undurchsichtig — das führt zu unvollständigen Anträgen und Doppelschleifen, die das ohnehin knappe Personal am Jobcenter zusätzlich belasten.</p>
+              <ul class="list-disc pl-5 space-y-1.5">
+                <li>Eine visuelle Roadmap vom Briefkasten am Papendorfer Weg bis zum vollständigen Antrag, mit Farbcodierung statt Aktenzeichen.</li>
+                <li>Wie bei Hebel 1: vor Einsatz mit tatsächlichen Nutzer:innen testen, nicht nur intern für gut befinden.</li>
+                <li>Ziel ist nicht, SGB-II-Semantik zu vermitteln, sondern den Pfad begehbar zu machen.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hebel 5 -->
+      <div class="lever-item panel overflow-hidden" data-open="false">
+        <h3 class="m-0">
+          <button type="button" class="lever-trigger w-full flex items-center gap-4 text-left px-6 py-5" aria-expanded="false" aria-controls="lever-panel-5" id="lever-btn-5">
+            <span class="font-mono text-xs px-2.5 py-1 rounded-full flex-none" style="background:var(--sand); color:var(--slate-soft);">05</span>
+            <span class="font-display font-semibold flex-1" style="font-size:1.15rem; color:var(--slate);">Sprachfreie Psychoedukation zu Schlaf &amp; Ernährung</span>
+            <svg class="lever-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="var(--slate)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </h3>
+        <div class="lever-panel" id="lever-panel-5" role="region" aria-labelledby="lever-btn-5">
+          <div>
+            <div class="px-6 pb-6 pt-1" style="color:var(--slate-soft);">
+              <p class="mb-3">Enger Wohnraum, knappes Budget und hoher Dauerstress verschieben in <em>jeder</em> Familie — unabhängig von Herkunft — die Wege des geringsten Widerstands: Bildschirme beruhigen schnell, energiedichte, preiswerte Lebensmittel sättigen günstig. Das ist eine Funktion der Lebensumstände, keine mitgebrachte kulturelle Eigenschaft. Genau deshalb wirkt hier reine Wissensvermittlung wenig — sie muss so niedrigschwellig sein, dass sie auch unter Stress ankommt.</p>
+              <ul class="list-disc pl-5 space-y-1.5">
+                <li>Zwei einfache Data-to-Vision-Grafiken direkt am Ankunftstag, vor jedem Sprachkurs: Zucker-Kurve (kurzer Energieschub, tiefer Fall) versus Wasser/Obst (flacher, stabiler Verlauf).</li>
+                <li>Schlaf-Visual: helles Display im dunklen Kinderzimmer neben leerer Batterie; dunkler, bildschirmfreier Raum neben voller Batterie.</li>
+                <li>Bewusst als Angebot, nicht als Belehrung gerahmt — Wahlfreiheit der Familien bleibt unangetastet.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ EXOSKELETT — META-MODAL ============ -->
+<dialog id="exoskelett" aria-labelledby="exo-title">
+  <div class="flex flex-col" style="max-height:85vh;">
+    <div class="flex items-start justify-between gap-4 px-6 sm:px-8 pt-6 pb-4" style="border-bottom:1px solid var(--sand-line);">
+      <div>
+        <p class="font-mono text-xs uppercase tracking-[0.14em] mb-1.5" style="color:var(--gold-text);">Offenes Exoskelett</p>
+        <h2 id="exo-title" class="font-display font-semibold" style="font-size:1.5rem; color:var(--slate);">Selbstprüfung dieses Moduls</h2>
+      </div>
+      <button type="button" id="close-exoskelett" aria-label="Exoskelett schließen" class="flex-none w-10 h-10 rounded-full flex items-center justify-center" style="background:var(--sand);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="var(--slate)" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div role="tablist" aria-label="Exoskelett-Bereiche" class="flex gap-1 px-4 sm:px-6 pt-3 overflow-x-auto" style="border-bottom:1px solid var(--sand-line);">
+      <button type="button" role="tab" id="tab-grenzen" aria-controls="panel-grenzen" aria-selected="true" tabindex="0" class="tab-btn font-mono text-xs sm:text-sm px-3.5 py-2.5 rounded-t-lg whitespace-nowrap">Grenzen</button>
+      <button type="button" role="tab" id="tab-gegen" aria-controls="panel-gegen" aria-selected="false" tabindex="-1" class="tab-btn font-mono text-xs sm:text-sm px-3.5 py-2.5 rounded-t-lg whitespace-nowrap">Gegenargumente</button>
+      <button type="button" role="tab" id="tab-netz" aria-controls="panel-netz" aria-selected="false" tabindex="-1" class="tab-btn font-mono text-xs sm:text-sm px-3.5 py-2.5 rounded-t-lg whitespace-nowrap">Selbstoptimierung</button>
+      <button type="button" role="tab" id="tab-weiter" aria-controls="panel-weiter" aria-selected="false" tabindex="-1" class="tab-btn font-mono text-xs sm:text-sm px-3.5 py-2.5 rounded-t-lg whitespace-nowrap">Weiterentwicklung</button>
+    </div>
+
+    <div class="overflow-y-auto px-6 sm:px-8 py-6" style="color:var(--slate-soft);">
+      <div role="tabpanel" id="panel-grenzen" aria-labelledby="tab-grenzen" tabindex="0">
+        <ul class="space-y-3 text-sm sm:text-base">
+          <li><strong style="color:var(--slate);">Von der Beeinträchtigung zur Unmöglichkeit:</strong> Die zitierte Stressforschung (Arnsten u.&nbsp;a.) belegt eine messbare Beeinträchtigung präfrontaler Funktion unter Stress. Sie belegt nicht, dass Spracherwerb dadurch „faktisch unmöglich" wird. Diese Formulierung wäre eine Überdehnung der Quellen und wurde in diesem Modul bewusst vermieden.</li>
+          <li><strong style="color:var(--slate);">Ein Modell ist keine Prognose:</strong> Der fiskalische Break-Even (≈16 Jahre) stammt aus einer einzelnen Modellrechnung mit expliziten Annahmen. Andere Institute kommen mit anderen Annahmen zu anderen Zahlen. Die Größenordnung ist belastbar, die Kommastelle nicht.</li>
+          <li><strong style="color:var(--slate);">Nicht jede Zahl war im verfügbaren Zeitfenster unabhängig verifizierbar:</strong> Für die Überbelegungsquote nach Staatsangehörigkeit und für einzelne internationale Vergleichszahlen konnte keine tagesaktuelle Primärquelle bestätigt werden. Sie wurden entsprechend vorsichtig oder gar nicht in die Zahlen dieses Moduls übernommen — vor operativem Gebrauch bitte gegen die jeweils aktuelle Destatis-/Eurostat-Tabelle prüfen.</li>
+          <li><strong style="color:var(--slate);">Piktogramme bleiben fehleranfällig:</strong> Auch hyperlokal co-kreierte Symbole können in Einzelfällen misslingen. Co-Kreation senkt das Risiko, sie eliminiert es nicht.</li>
+        </ul>
+      </div>
+      <div role="tabpanel" id="panel-gegen" aria-labelledby="tab-gegen" tabindex="0" hidden>
+        <ul class="space-y-3 text-sm sm:text-base">
+          <li><strong style="color:var(--slate);">Struktur schlägt Psychoedukation:</strong> Die eigenen Diagnosedaten dieses Moduls zeigen den schärfsten Engpass in fehlender Kita-Infrastruktur — einem Verwaltungsproblem, keinem kognitiven. Man könnte argumentieren, dass jede Stunde, die in individuelle Aufklärung statt in Kita-Akquise fließt, an der falschen Stelle investiert ist.</li>
+          <li><strong style="color:var(--slate);">Risiko der Vereinheitlichung:</strong> Wer eine ganze Gruppe systematisch mit vereinfachter, nonverbaler Kommunikation adressiert, kann unbeabsichtigt bevormunden — gerade gegenüber Personen, die verbale, gleichberechtigte Kommunikation weder brauchen noch wünschen. Universal Design sollte Optionen erweitern, nicht Standardpfade ersetzen.</li>
+          <li><strong style="color:var(--slate);">Der Zielkonflikt bei Verfahrensdauer:</strong> Man kann ebenso gut argumentieren, dass anhaltende Unsicherheit im Asylverfahren selbst der größte Stressor ist — und dass schnellere, nicht langsamere Entscheidungen dem Nervensystem besser dienen. Das steht in echter Spannung zur Kritik am Schweizer Modell in Abschnitt&nbsp;2.</li>
+        </ul>
+      </div>
+      <div role="tabpanel" id="panel-netz" aria-labelledby="tab-netz" tabindex="0" hidden>
+        <ul class="space-y-3 text-sm sm:text-base">
+          <li><strong style="color:var(--slate);">Piktogramme als Hypothese behandeln:</strong> Jedes Symbol und jede Roadmap sollte laufend mit denselben Verständlichkeitstests aus Hebel&nbsp;1 überprüft werden, nicht einmalig produziert und dann als erledigt betrachtet.</li>
+          <li><strong style="color:var(--slate);">Wirkung statt Umsetzung messen:</strong> Für jeden Hebel eine einfache Kennzahl führen — Kursteilnahme, Terminwahrnehmung, Nutzung der Betreuungsrotation — und quartalsweise gegen die Ausgangslage prüfen.</li>
+          <li><strong style="color:var(--slate);">Praxiswissen zurückspielen:</strong> Die Job-Turbo-Kritik in Abschnitt&nbsp;2 zeigt, was passiert, wenn Vorgaben top-down verschärft werden, ohne Fachkräfte vor Ort einzubeziehen. Der SAM&nbsp;Verein sollte diesen Fehler nicht wiederholen — Rückmeldungen der Sozialarbeiter:innen sollten direkt in die Priorisierung der fünf Hebel einfließen.</li>
+        </ul>
+      </div>
+      <div role="tabpanel" id="panel-weiter" aria-labelledby="tab-weiter" tabindex="0" hidden>
+        <ul class="space-y-3 text-sm sm:text-base">
+          <li><strong style="color:var(--slate);">Feste Kita-Kooperation statt Dauerprovisorium:</strong> Die Peer-to-Peer-Rotation (Hebel&nbsp;3) ist ein Übergangsmodell. Eine Kooperation mit lokalen Kita-Trägern für auch nur wenige reservierte Plätze würde den strukturellen Engpass direkter adressieren.</li>
+          <li><strong style="color:var(--slate);">Anerkennung beschleunigen:</strong> Da verzögerte Qualifikationsanerkennung laut IAB-Daten zu dauerhafter Dequalifizierung führt, wäre eine Kooperation mit Kammern oder regionalen Arbeitgebern zur Beschleunigung von Anerkennungsverfahren ein hebelstarker nächster Schritt.</li>
+          <li><strong style="color:var(--slate);">Eigene Daten statt importierter Statistik:</strong> Mittelfristig sollte Bad&nbsp;Belzig eigene, anonymisierte Verlaufsdaten erheben, um die überregionalen IAB-/Destatis-Zahlen dieses Moduls schrittweise durch lokale Evidenz zu ergänzen oder zu korrigieren.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<footer class="px-5 sm:px-8 py-14" style="background:var(--slate); color:var(--sand);">
+  <div class="max-w-5xl mx-auto grid sm:grid-cols-3 gap-8 text-sm">
+    <div>
+      <p class="font-display font-semibold text-lg mb-2" style="color:var(--alabaster);">SAM Verein</p>
+      <p style="color:#B9C0C9;">Soziale Arbeit Mittelmark e.&nbsp;V. — Bad Belzig, Landkreis Potsdam-Mittelmark.</p>
+    </div>
+    <div>
+      <p class="font-semibold mb-2" style="color:var(--alabaster);">Über dieses Modul</p>
+      <p style="color:#B9C0C9;">Systemkybernetischer Praxis-Transfer. Epistemische Stände (Fakt / Modell / Umstritten) sind an den Kernaussagen ausgewiesen; Einzelnachweise auf Anfrage. Zahlen aus Sekundärquellen wurden, wo möglich, gegen Primärquellen (IAB, CFS, Wirtschaftsdienst) geprüft — Details im Exoskelett-Tab „Grenzen".</p>
+    </div>
+    <div>
+      <p class="font-semibold mb-2" style="color:var(--alabaster);">Quellen &amp; weiterführend</p>
+      <ul class="space-y-2">
+        <li>
+          <a href="./quelldossier-rohfassung.pdf" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 font-semibold underline decoration-1 underline-offset-2" style="color:var(--alabaster);">
+            Quelldossier (PDF, Rohfassung)
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <p class="mt-1" style="color:#B3B9C0; font-size:0.8rem;">Interner Erstentwurf vor der Exoskelett-Prüfung. Enthält Formulierungen (u.&nbsp;a. zu „faktischer Unmöglichkeit" des Spracherwerbs und zu Hebel&nbsp;5), die in diesem Modul bewusst korrigiert wurden — siehe Exoskelett&nbsp;→&nbsp;„Grenzen".</p>
+        </li>
+        <li class="pt-1">
+          <a href="https://stillerevolution.github.io/schaltzentrale-der-metaanalyse-2026/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 font-semibold underline decoration-1 underline-offset-2" style="color:var(--alabaster);">
+            Schaltzentrale der Metaanalyse
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <p class="mt-1" style="color:#B3B9C0; font-size:0.8rem;">Projekt Sternenstaub — übergeordnetes Portal der fünf Knotenpunkte.</p>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-5xl mx-auto mt-10 pt-6 text-xs" style="border-top:1px solid #3A404A; color:#B3B9C0;">
+    Jobcenter MAIA, Papendorfer Weg · Gemeinschaftsunterkünfte Weitzgrunder Weg &amp; Brück-Linthe.
+  </div>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Scroll-Fortschritt ---------- */
+  var bar = document.getElementById('scroll-progress');
+  function updateProgress(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (scrolled / max) * 100 : 0) + '%';
+  }
+  document.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  /* ---------- Reveal-on-Scroll ---------- */
+  var revealEls = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window && !reduceMotion){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('is-visible'); });
+  }
+
+  /* ---------- Epistemische Chip-Popover ---------- */
+  document.querySelectorAll('.chip').forEach(function(chip){
+    chip.addEventListener('click', function(e){
+      e.stopPropagation();
+      var wasOpen = chip.classList.contains('is-open');
+      document.querySelectorAll('.chip.is-open').forEach(function(c){ c.classList.remove('is-open'); });
+      if(!wasOpen){ chip.classList.add('is-open'); }
+    });
+  });
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.chip.is-open').forEach(function(c){ c.classList.remove('is-open'); });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      document.querySelectorAll('.chip.is-open').forEach(function(c){ c.classList.remove('is-open'); });
+    }
+  });
+
+  /* ---------- Hebel-Akkordeon ---------- */
+  document.querySelectorAll('.lever-trigger').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var item = btn.closest('.lever-item');
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      item.setAttribute('data-open', String(!expanded));
+    });
+  });
+
+  /* ---------- Exoskelett-Dialog ---------- */
+  var dialog = document.getElementById('exoskelett');
+  var openers = [document.getElementById('open-exoskelett-nav')];
+  var closeBtn = document.getElementById('close-exoskelett');
+  var lastFocused = null;
+
+  function openDialog(){
+    lastFocused = document.activeElement;
+    dialog.showModal();
+    closeBtn.focus();
+    document.addEventListener('keydown', trapFocus);
+  }
+  function closeDialog(){
+    dialog.close();
+  }
+  dialog.addEventListener('close', function(){
+    document.removeEventListener('keydown', trapFocus);
+    if(lastFocused && typeof lastFocused.focus === 'function'){ lastFocused.focus(); }
+  });
+  dialog.addEventListener('click', function(e){
+    var rect = dialog.getBoundingClientRect();
+    var inside = rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
+                 rect.left <= e.clientX && e.clientX <= rect.left + rect.width;
+    if(!inside){ closeDialog(); }
+  });
+  openers.forEach(function(btn){ if(btn){ btn.addEventListener('click', openDialog); } });
+  closeBtn.addEventListener('click', closeDialog);
+
+  function trapFocus(e){
+    if(e.key !== 'Tab') return;
+    var focusable = dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if(!focusable.length) return;
+    var first = focusable[0], last = focusable[focusable.length - 1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+
+  /* ---------- Exoskelett-Tabs (WAI-ARIA Tabs, Pfeiltasten) ---------- */
+  var tabs = Array.prototype.slice.call(dialog.querySelectorAll('[role="tab"]'));
+  var panels = Array.prototype.slice.call(dialog.querySelectorAll('[role="tabpanel"]'));
+  function selectTab(tab){
+    tabs.forEach(function(t){
+      var selected = t === tab;
+      t.setAttribute('aria-selected', String(selected));
+      t.tabIndex = selected ? 0 : -1;
+    });
+    panels.forEach(function(p){
+      p.hidden = p.id !== tab.getAttribute('aria-controls');
+    });
+  }
+  tabs.forEach(function(tab, idx){
+    tab.addEventListener('click', function(){ selectTab(tab); });
+    tab.addEventListener('keydown', function(e){
+      var newIdx = null;
+      if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){ newIdx = (idx + 1) % tabs.length; }
+      else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ newIdx = (idx - 1 + tabs.length) % tabs.length; }
+      else if(e.key === 'Home'){ newIdx = 0; }
+      else if(e.key === 'End'){ newIdx = tabs.length - 1; }
+      if(newIdx !== null){
+        e.preventDefault();
+        tabs[newIdx].focus();
+        selectTab(tabs[newIdx]);
+      }
+    });
+  });
+
+  /* ---------- Magnetisches Partikel-Netzwerk (Hero-Canvas) ---------- */
+  var canvas = document.getElementById('hero-canvas');
+  if(canvas && !reduceMotion){
+    var ctx = canvas.getContext('2d');
+    var heroSection = canvas.closest('section');
+    var particles = [];
+    var mouse = { x: -9999, y: -9999, active: false };
+    var W, H, dpr;
+
+    function resize(){
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = heroSection.clientWidth;
+      H = heroSection.clientHeight;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var count = Math.max(28, Math.min(70, Math.round((W * H) / 16000)));
+      particles = [];
+      for(var i = 0; i < count; i++){
+        particles.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: (Math.random() - 0.5) * 0.35,
+          r: 1.1 + Math.random() * 1.6
+        });
+      }
+    }
+
+    function step(){
+      ctx.clearRect(0, 0, W, H);
+      var linkDist = 128, magnetRadius = 150;
+
+      for(var i = 0; i < particles.length; i++){
+        var p = particles[i];
+
+        if(mouse.active){
+          var dx = mouse.x - p.x, dy = mouse.y - p.y;
+          var dist = Math.sqrt(dx*dx + dy*dy) || 0.001;
+          if(dist < magnetRadius){
+            var pull = (1 - dist / magnetRadius);
+            if(dist > 34){
+              p.vx += (dx / dist) * pull * 0.055;
+              p.vy += (dy / dist) * pull * 0.055;
+            } else {
+              p.vx -= (dx / dist) * 0.12;
+              p.vy -= (dy / dist) * 0.12;
+            }
+          }
+        }
+
+        p.vx *= 0.965; p.vy *= 0.965;
+        p.x += p.vx; p.y += p.vy;
+
+        if(p.x < -10) p.x = W + 10; if(p.x > W + 10) p.x = -10;
+        if(p.y < -10) p.y = H + 10; if(p.y > H + 10) p.y = -10;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(169,118,47,0.55)';
+        ctx.fill();
+      }
+
+      for(var a = 0; a < particles.length; a++){
+        for(var b = a + 1; b < particles.length; b++){
+          var pa = particles[a], pb = particles[b];
+          var ddx = pa.x - pb.x, ddy = pa.y - pb.y;
+          var d = Math.sqrt(ddx*ddx + ddy*ddy);
+          if(d < linkDist){
+            ctx.beginPath();
+            ctx.moveTo(pa.x, pa.y);
+            ctx.lineTo(pb.x, pb.y);
+            ctx.strokeStyle = 'rgba(157,196,174,' + (0.35 * (1 - d / linkDist)) + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    heroSection.addEventListener('mousemove', function(e){
+      var rect = heroSection.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+      mouse.active = true;
+    });
+    heroSection.addEventListener('mouseleave', function(){ mouse.active = false; });
+    heroSection.addEventListener('touchmove', function(e){
+      if(!e.touches || !e.touches.length) return;
+      var rect = heroSection.getBoundingClientRect();
+      mouse.x = e.touches[0].clientX - rect.left;
+      mouse.y = e.touches[0].clientY - rect.top;
+      mouse.active = true;
+    }, { passive: true });
+
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(step);
+  }
+})();
+</script>
+</body>
+</html>
