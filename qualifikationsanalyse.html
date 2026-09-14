@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAM e. V. – Qualifikationsanalyse (Work-Sampling)</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #172554;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+      --accent: #0284c7;
+      --success: #15803d;
+      --danger: #b91c1c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 1.5rem 1rem;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      background: var(--card);
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    header {
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      background: #e0e7ff;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    h1 { font-size: 1.5rem; color: var(--primary); line-height: 1.2; }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 0.25rem; }
+
+    fieldset {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    legend {
+      font-weight: 700;
+      color: var(--primary);
+      padding: 0 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .full-width { grid-column: 1 / -1; }
+
+    label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--text); }
+    input[type="text"], input[type="date"], select, textarea {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: #fff;
+    }
+    textarea { min-height: 80px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+    }
+
+    .matrix-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 2fr;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .matrix-row:last-child { border-bottom: none; }
+    .matrix-title { font-size: 0.88rem; font-weight: 600; }
+    .matrix-desc { font-size: 0.75rem; color: var(--muted); }
+
+    .radio-group label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    .radio-group input[type="radio"] { margin-top: 0.2rem; }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    button {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #e2e8f0; color: var(--text); }
+    .btn-secondary:hover { background: #cbd5e1; }
+
+    /* Modal / QR Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 100;
+    }
+    .modal {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+    .qr-wrapper {
+      margin: 1.5rem auto;
+      display: flex;
+      justify-content: center;
+    }
+    .qr-wrapper canvas {
+      border: 8px solid #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    .pin-display {
+      background: #f1f5f9;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    .pin-display strong { font-family: monospace; font-size: 1.25rem; color: var(--primary); letter-spacing: 0.1em; }
+
+    /* Auth Prompt (Locked view) */
+    #auth-screen {
+      display: none;
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+    .pin-input {
+      font-size: 1.5rem;
+      letter-spacing: 0.2em;
+      text-align: center;
+      width: 160px;
+      margin: 1rem auto;
+      display: block;
+      font-family: monospace;
+    }
+
+    /* Print / Read-only Styling */
+    .signatures {
+      display: none;
+      margin-top: 3rem;
+      padding-top: 1rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+    .sig-line {
+      border-top: 1px solid #000;
+      padding-top: 0.4rem;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; font-size: 11pt; color: #000; }
+      .container { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+      .actions, .modal-overlay, #auth-screen, .badge, .no-print { display: none !important; }
+      input, select, textarea {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        font-size: 10.5pt !important;
+        color: #000 !important;
+      }
+      .matrix-row { border-bottom: 1px solid #ccc; padding: 4pt 0; page-break-inside: avoid; }
+      fieldset { border: 1px solid #bbb; margin-bottom: 1rem; page-break-inside: avoid; }
+      .signatures { display: grid; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Auth Screen (Nur sichtbar wenn ein Hash vorliegt) -->
+  <div id="auth-screen">
+    <div class="badge">Verschlüsseltes Protokoll</div>
+    <h2>Dokument ist geschützt</h2>
+    <p class="subtitle" style="margin-bottom: 1rem;">Bitte die vereinbarte 4-stellige PIN eingeben, um den Beobachtungsbogen zu entschlüsseln.</p>
+    <input type="password" id="unlock-pin" class="pin-input" maxlength="8" placeholder="••••" autofocus>
+    <div style="display: flex; gap: 0.5rem; justify-content: center;">
+      <button class="btn-primary" onclick="unlockDocument()">Dokument entsperren</button>
+      <button class="btn-secondary" onclick="resetToNew()">Neues Formular</button>
+    </div>
+    <p id="unlock-err" style="color: var(--danger); font-size: 0.85rem; margin-top: 0.75rem; display: none;">Falsche PIN oder beschädigte Daten.</p>
+  </div>
+
+  <!-- Hauptformular -->
+  <form id="eval-form">
+    <header>
+      <div class="badge">Praxis-Modul 02 · Bad Belzig</div>
+      <h1>Qualifikationsanalyse (Work-Sampling)</h1>
+      <p class="subtitle">Standardisiertes Kompetenzraster nach § 14 BQFG / § 50b HwO zur Vermeidung von Dequalifizierung.</p>
+    </header>
+
+    <fieldset>
+      <legend>1. Stammdaten & Rahmen</legend>
+      <div class="grid">
+        <div>
+          <label>Teilnehmende Person</label>
+          <input type="text" id="p_name" placeholder="Vorname Nachname" required>
+        </div>
+        <div>
+          <label>Gewerk / Berufsfeld</label>
+          <input type="text" id="trade" placeholder="z. B. Elektro, SHK, Holz, Kfz" required>
+        </div>
+        <div>
+          <label>Betrieb / Standort</label>
+          <input type="text" id="company" placeholder="Firma in Potsdam-Mittelmark" required>
+        </div>
+        <div>
+          <label>Beobachtende Fachkraft / Meister:in</label>
+          <input type="text" id="observer" placeholder="Name, Meisterbrief / Funktion" required>
+        </div>
+        <div class="full-width">
+          <label>Aufgabenstellung der praktischen Arbeitsprobe</label>
+          <input type="text" id="task" placeholder="Kurzbeschreibung der Aufgabe (z. B. Montage Unterverteilung)">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>2. Praktische Kompetenzmatrix</legend>
+      <div class="matrix-row">
+        <div>
+          <div class="matrix-title">1. Arbeitssicherheit & PSA</div>
+          <div class="matrix-desc">Schutzkleidung, Ordnung, Gefahrenerkennung</div>
+        </div>
+        <select id="m1">
+          <option value="3">3 – Fachkraft</option>
+          <option value="2">2 – Teilqualifiziert</option>
+          <option value="1">1 – Helferniveau</option>
+          <option value="0">0 – Nicht vorhanden</option>
+        </select>
+        <input type="text" id="m1_note" placeholder="Notiz / Detail">
+      </div>
+
+      <div class="matrix-row">
+        <div>
+          <div class="matrix-title">2. Werkzeug- & Maschineneinsatz</div>
+          <div class="matrix-desc">Zielsichere Wahl, sachgerechte Handhabung</div>
+        </div>
+        <select id="m2">
+          <option value="3">3 – Fachkraft</option>
+          <option value="2">2 – Teilqualifiziert</option>
+          <option value="1">1 – Helferniveau</option>
+          <option value="0">0 – Nicht vorhanden</option>
+        </select>
+        <input type="text" id="m2_note" placeholder="Notiz / Detail">
+      </div>
+
+      <div class="matrix-row">
+        <div>
+          <div class="matrix-title">3. Fachliche Ausführung & Maß</div>
+          <div class="matrix-desc">Präzision, Fügetechniken, Eigenkontrolle</div>
+        </div>
+        <select id="m3">
+          <option value="3">3 – Fachkraft</option>
+          <option value="2">2 – Teilqualifiziert</option>
+          <option value="1">1 – Helferniveau</option>
+          <option value="0">0 – Nicht vorhanden</option>
+        </select>
+        <input type="text" id="m3_note" placeholder="Notiz / Detail">
+      </div>
+
+      <div class="matrix-row">
+        <div>
+          <div class="matrix-title">4. Problemlösung & Organisation</div>
+          <div class="matrix-desc">Reihenfolge, Tempo, Ruhe bei Fehlern</div>
+        </div>
+        <select id="m4">
+          <option value="3">3 – Fachkraft</option>
+          <option value="2">2 – Teilqualifiziert</option>
+          <option value="1">1 – Helferniveau</option>
+          <option value="0">0 – Nicht vorhanden</option>
+        </select>
+        <input type="text" id="m4_note" placeholder="Notiz / Detail">
+      </div>
+
+      <div class="matrix-row">
+        <div>
+          <div class="matrix-title">5. Fachsprache & Kooperation</div>
+          <div class="matrix-desc">Verständnis von Plänen/Skizzen, Rückfragen</div>
+        </div>
+        <select id="m5">
+          <option value="3">3 – Fachkraft</option>
+          <option value="2">2 – Teilqualifiziert</option>
+          <option value="1">1 – Helferniveau</option>
+          <option value="0">0 – Nicht vorhanden</option>
+        </select>
+        <input type="text" id="m5_note" placeholder="Notiz / Detail">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>3. Gesamtergebnis & Handlungsempfehlung</legend>
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="rec" value="A" checked>
+          <span><strong>A: Volles Fachkraftniveau</strong> – Direkte Fachanstellung / volle Gleichwertigkeit empfohlen.</span>
+        </label>
+        <label>
+          <input type="radio" name="rec" value="B">
+          <span><strong>B: Fachhelfer mit Anpassungsqualifizierung (Modell 80/20)</strong> – Fachliche Basis gut, Schulung in Fachsprache/Normen nötig.</span>
+        </label>
+        <label>
+          <input type="radio" name="rec" value="C">
+          <span><strong>C: Helferniveau mit Potenzial</strong> – Grundkenntnisse vorhanden, weitergehende Qualifizierung empfohlen.</span>
+        </label>
+        <label>
+          <input type="radio" name="rec" value="D">
+          <span><strong>D: Keine verwertbaren Vorkenntnisse</strong> – Deckt sich nicht mit den Angaben.</span>
+        </label>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <label>Fazit des Meisters / der Fachkraft</label>
+        <textarea id="summary" placeholder="Stärken, festgestellte Lücken und konkrete nächste Schritte..."></textarea>
+      </div>
+    </fieldset>
+
+    <div class="signatures">
+      <div class="sig-line">Unterschrift Fachkraft / Meister:in (Betrieb)</div>
+      <div class="sig-line">Unterschrift Teilnehmende Person / SAM e. V.</div>
+    </div>
+
+    <div class="actions no-print">
+      <button type="button" class="btn-primary" onclick="initShareFlow()">🔒 Verschlüsseln & QR-Code generieren</button>
+      <button type="button" class="btn-secondary" onclick="window.print()">🖨️ Drucken / Als PDF speichern</button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal: QR-Code & Share -->
+<div id="share-modal" class="modal-overlay">
+  <div class="modal">
+    <h3>Formular verschlüsselt!</h3>
+    <p class="subtitle">Empfänger kann den Bogen mit der Kamera scannen.</p>
+    
+    <div class="qr-wrapper" id="qr-container"></div>
+
+    <div class="pin-display">
+      Schutz-PIN für Empfänger:<br>
+      <strong id="display-pin">----</strong>
+    </div>
+
+    <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+      <button class="btn-primary" onclick="copyShareLink()">📋 Link kopieren</button>
+      <button class="btn-secondary" onclick="closeModal()">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Minimalistischer, robuster Inline-QR-Generator (Type 10-40 Auto-Byte) -->
+<script>
+/**
+ * Minimaler Standalone QR-Code Generator in reinem JS (Byte Mode)
+ * Erzeugt saubere Canvas-Elemente ohne externe Bibliotheken.
+ */
+var QRCodeLib = (function(){
+  function QR8bitByte(data){ this.mode=4; this.data=data; }
+  QR8bitByte.prototype={
+    getLength: function(){ return this.data.length; },
+    write: function(buffer){
+      for(var i=0; i<this.data.length; i++){ buffer.put(this.data.charCodeAt(i), 8); }
+    }
+  };
+  var QRMath = {
+    glog: function(n){ if(n<1)throw new Error(); return QRMath.LOG_TABLE[n]; },
+    gexp: function(n){ while(n<0)n+=255; while(n>=255)n-=255; return QRMath.EXP_TABLE[n]; },
+    EXP_TABLE: new Array(256), LOG_TABLE: new Array(256)
+  };
+  for(var i=0;i<8;i++) QRMath.EXP_TABLE[i]=1<<i;
+  for(var i=8;i<256;i++) QRMath.EXP_TABLE[i]=QRMath.EXP_TABLE[i-4]^QRMath.EXP_TABLE[i-5]^QRMath.EXP_TABLE[i-6]^QRMath.EXP_TABLE[i-8];
+  for(var i=0;i<255;i++) QRMath.LOG_TABLE[QRMath.EXP_TABLE[i]]=i;
+
+  function QRPolynomial(num, shift){
+    var offset=0; while(offset<num.length && num[offset]==0) offset++;
+    this.num = new Array(num.length - offset + shift);
+    for(var i=0;i<num.length-offset;i++) this.num[i]=num[i+offset];
+  }
+  QRPolynomial.prototype={
+    get: function(i){ return this.num[i]; },
+    getLength: function(){ return this.num.length; },
+    multiply: function(e){
+      var num = new Array(this.getLength() + e.getLength() - 1);
+      for(var i=0;i<num.length;i++) num[i]=0;
+      for(var i=0;i<this.getLength();i++){
+        for(var j=0;j<e.getLength();j++){
+          num[i+j] ^= QRMath.gexp(QRMath.glog(this.get(i)) + QRMath.glog(e.get(j)));
+        }
+      }
+      return new QRPolynomial(num, 0);
+    },
+    mod: function(e){
+      if(this.getLength() - e.getLength() < 0) return this;
+      var ratio = QRMath.glog(this.get(0)) - QRMath.glog(e.get(0));
+      var num = new Array(this.getLength());
+      for(var i=0;i<this.getLength();i++) num[i]=this.get(i);
+      for(var i=0;i<e.getLength();i++) num[i] ^= QRMath.gexp(QRMath.glog(e.get(i)) + ratio);
+      return new QRPolynomial(num, 0).mod(e);
+    }
+  };
+
+  function QRRSBlock(totalCount, dataCount){ this.totalCount=totalCount; this.dataCount=dataCount; }
+  QRRSBlock.RS_BLOCK_TABLE = [
+    [1, 26, 19], [1, 44, 34], [1, 70, 55], [1, 100, 80], [1, 134, 108],
+    [2, 86, 68], [2, 98, 78], [2, 121, 97], [2, 146, 116], [2, 86, 68, 2, 87, 69],
+    [4, 101, 81], [2, 116, 92, 2, 117, 93], [4, 133, 107], [3, 145, 115, 1, 146, 116],
+    [5, 109, 87, 1, 110, 88], [5, 122, 98, 1, 123, 99], [1, 135, 107, 5, 136, 108],
+    [5, 150, 120, 1, 151, 121], [3, 141, 113, 4, 142, 114], [3, 135, 107, 5, 136, 108]
+  ];
+  QRRSBlock.getRSBlocks = function(typeNumber){
+    var rsBlock = QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4 + 1]; // Error Correct L
+    if(!rsBlock) rsBlock = [1, 100, 80];
+    var list = [];
+    for(var i=0; i<rsBlock.length; i+=3){
+      var count = rsBlock[i], totalCount = rsBlock[i+1], dataCount = rsBlock[i+2];
+      for(var j=0; j<count; j++) list.push(new QRRSBlock(totalCount, dataCount));
+    }
+    return list;
+  };
+
+  function QRBitBuffer(){ this.buffer=[]; this.length=0; }
+  QRBitBuffer.prototype = {
+    put: function(num, length){ for(var i=0; i<length; i++) this.putBit(((num >>> (length-i-1)) & 1) == 1); },
+    putBit: function(bit){
+      var bufIndex = Math.floor(this.length / 8);
+      if(this.buffer.length <= bufIndex) this.buffer.push(0);
+      if(bit) this.buffer[bufIndex] |= (0x80 >>> (this.length % 8));
+      this.length++;
+    }
+  };
+
+  function QRCode(typeNumber){
+    this.typeNumber = typeNumber;
+    this.modules = null;
+    this.moduleCount = 0;
+    this.dataList = [];
+  }
+  QRCode.prototype = {
+    addData: function(data){ this.dataList.push(new QR8bitByte(data)); },
+    isDark: function(row, col){ return this.modules[row][col]; },
+    getModuleCount: function(){ return this.moduleCount; },
+    make: function(){
+      this.moduleCount = this.typeNumber * 4 + 17;
+      this.modules = new Array(this.moduleCount);
+      for(var row=0; row<this.moduleCount; row++){
+        this.modules[row] = new Array(this.moduleCount);
+        for(var col=0; col<this.moduleCount; col++) this.modules[row][col] = null;
+      }
+      this.setupPositionProbePattern(0, 0);
+      this.setupPositionProbePattern(this.moduleCount-7, 0);
+      this.setupPositionProbePattern(0, this.moduleCount-7);
+      this.setupTimingPattern();
+      this.mapData(this.createData());
+    },
+    setupPositionProbePattern: function(row, col){
+      for(var r=-1; r<=7; r++){
+        for(var c=-1; c<=7; c++){
+          if(row+r<=-1 || this.moduleCount<=row+r || col+c<=-1 || this.moduleCount<=col+c) continue;
+          if((0<=r && r<=6 && (c==0 || c==6)) || (0<=c && c<=6 && (r==0 || r==6)) || (2<=r && r<=4 && 2<=c && c<=4))
+            this.modules[row+r][col+c] = true;
+          else this.modules[row+r][col+c] = false;
+        }
+      }
+    },
+    setupTimingPattern: function(){
+      for(var r=8; r<this.moduleCount-8; r++){ if(this.modules[r][6]===null) this.modules[r][6] = (r%2==0); }
+      for(var c=8; c<this.moduleCount-8; c++){ if(this.modules[6][c]===null) this.modules[6][c] = (c%2==0); }
+    },
+    createData: function(){
+      var rsBlocks = QRRSBlock.getRSBlocks(this.typeNumber);
+      var buffer = new QRBitBuffer();
+      for(var i=0; i<this.dataList.length; i++){
+        var d = this.dataList[i];
+        buffer.put(d.mode, 4);
+        buffer.put(d.getLength(), 8); // simplified 8-bit length
+        d.write(buffer);
+      }
+      var totalDataCount = 0;
+      for(var i=0; i<rsBlocks.length; i++) totalDataCount += rsBlocks[i].dataCount;
+      if(buffer.length + 4 <= totalDataCount * 8) buffer.put(0, 4);
+      while(buffer.length % 8 != 0) buffer.putBit(false);
+      while(true){
+        if(buffer.length >= totalDataCount * 8) break;
+        buffer.put(0xEC, 8);
+        if(buffer.length >= totalDataCount * 8) break;
+        buffer.put(0x11, 8);
+      }
+      return this.createBytes(buffer, rsBlocks);
+    },
+    createBytes: function(buffer, rsBlocks){
+      var offset=0, maxDcCount=0, maxEcCount=0, dcdata=new Array(rsBlocks.length), ecdata=new Array(rsBlocks.length);
+      for(var r=0; r<rsBlocks.length; r++){
+        var dcCount = rsBlocks[r].dataCount, ecCount = rsBlocks[r].totalCount - dcCount;
+        maxDcCount = Math.max(maxDcCount, dcCount); maxEcCount = Math.max(maxEcCount, ecCount);
+        dcdata[r] = new Array(dcCount);
+        for(var i=0; i<dcdata[r].length; i++) dcdata[r][i] = 0xff & buffer.buffer[i + offset];
+        offset += dcCount;
+        var rsPoly = new QRPolynomial([1], 0);
+        for(var i=0; i<ecCount; i++) rsPoly = rsPoly.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0));
+        var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1);
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for(var i=0; i<ecdata[r].length; i++){
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0)? modPoly.get(modIndex) : 0;
+        }
+      }
+      var data = [];
+      for(var i=0; i<maxDcCount; i++){ for(var r=0; r<rsBlocks.length; r++){ if(i<dcdata[r].length) data.push(dcdata[r][i]); } }
+      for(var i=0; i<maxEcCount; i++){ for(var r=0; r<rsBlocks.length; r++){ if(i<ecdata[r].length) data.push(ecdata[r][i]); } }
+      return data;
+    },
+    mapData: function(data){
+      var inc = -1, row = this.moduleCount - 1, bitIndex = 7, byteIndex = 0;
+      for(var col = this.moduleCount - 1; col > 0; col -= 2){
+        if(col == 6) col--;
+        while(true){
+          for(var c=0; c<2; c++){
+            if(this.modules[row][col - c] === null){
+              var dark = false;
+              if(byteIndex < data.length) dark = (((data[byteIndex] >>> bitIndex) & 1) == 1);
+              this.modules[row][col - c] = dark;
+              bitIndex--;
+              if(bitIndex == -1){ byteIndex++; bitIndex = 7; }
+            }
+          }
+          row += inc;
+          if(row < 0 || this.moduleCount <= row){ row -= inc; inc = -inc; break; }
+        }
+      }
+    }
+  };
+
+  return {
+    drawCanvas: function(text, canvas, size){
+      // Auto-fit version
+      var len = text.length;
+      var type = 4;
+      if(len > 60) type = 8;
+      if(len > 120) type = 12;
+      if(len > 250) type = 16;
+      if(len > 400) type = 20;
+
+      var qr = new QRCode(type);
+      qr.addData(text);
+      qr.make();
+      var count = qr.getModuleCount();
+      canvas.width = size;
+      canvas.height = size;
+      var ctx = canvas.getContext('2d');
+      var tile = size / count;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,size,size);
+      ctx.fillStyle = '#0f172a';
+      for(var r=0; r<count; r++){
+        for(var c=0; c<count; c++){
+          if(qr.isDark(r, c)){
+            ctx.fillRect(Math.round(c*tile), Math.round(r*tile), Math.ceil(tile), Math.ceil(tile));
+          }
+        }
+      }
+    }
+  };
+})();
+</script>
+
+<!-- Logik: Verschlüsselung, URL-Hash & App-State -->
+<script>
+// Web Crypto Hilfsfunktionen (PBKDF2 + AES-GCM 256)
+async function deriveKey(pin, salt) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(pin), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+
+function bufferToBase64Url(buf) {
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64UrlToBuffer(base64) {
+  let b64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
+// Formular-Daten sammeln
+function getFormData() {
+  const selectedRec = document.querySelector('input[name="rec"]:checked')?.value || 'B';
+  return {
+    p: document.getElementById('p_name').value.trim(),
+    t: document.getElementById('trade').value.trim(),
+    c: document.getElementById('company').value.trim(),
+    o: document.getElementById('observer').value.trim(),
+    k: document.getElementById('task').value.trim(),
+    m1: document.getElementById('m1').value,
+    m1_n: document.getElementById('m1_note').value.trim(),
+    m2: document.getElementById('m2').value,
+    m2_n: document.getElementById('m2_note').value.trim(),
+    m3: document.getElementById('m3').value,
+    m3_n: document.getElementById('m3_note').value.trim(),
+    m4: document.getElementById('m4').value,
+    m4_n: document.getElementById('m4_note').value.trim(),
+    m5: document.getElementById('m5').value,
+    m5_n: document.getElementById('m5_note').value.trim(),
+    r: selectedRec,
+    s: document.getElementById('summary').value.trim(),
+    dt: new Date().toLocaleDateString('de-DE')
+  };
+}
+
+function setFormData(data) {
+  document.getElementById('p_name').value = data.p || '';
+  document.getElementById('trade').value = data.t || '';
+  document.getElementById('company').value = data.c || '';
+  document.getElementById('observer').value = data.o || '';
+  document.getElementById('task').value = data.k || '';
+  document.getElementById('m1').value = data.m1 || '2';
+  document.getElementById('m1_note').value = data.m1_n || '';
+  document.getElementById('m2').value = data.m2 || '2';
+  document.getElementById('m2_note').value = data.m2_n || '';
+  document.getElementById('m3').value = data.m3 || '2';
+  document.getElementById('m3_note').value = data.m3_n || '';
+  document.getElementById('m4').value = data.m4 || '2';
+  document.getElementById('m4_note').value = data.m4_n || '';
+  document.getElementById('m5').value = data.m5 || '2';
+  document.getElementById('m5_note').value = data.m5_n || '';
+  
+  const recEl = document.querySelector(`input[name="rec"][value="${data.r}"]`);
+  if (recEl) recEl.checked = true;
+  document.getElementById('summary').value = data.s || '';
+}
+
+// Verschlüsseln & QR-Code ausgeben
+async function initShareFlow() {
+  const form = document.getElementById('eval-form');
+  if (!form.checkValidity()) {
+    alert("Bitte fülle die Pflichtfelder (Teilnehmer, Gewerk, Betrieb, Meister) aus.");
+    return;
+  }
+
+  // 4-stellige Zufalls-PIN erzeugen
+  const pin = Math.floor(1000 + Math.random() * 9000).toString();
+  const data = getFormData();
+  const jsonStr = JSON.stringify(data);
+
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(pin, salt);
+
+  const enc = new TextEncoder();
+  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, enc.encode(jsonStr));
+
+  // Aufbau Payload: Salt (16b) + IV (12b) + Ciphertext
+  const payload = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
+  payload.set(salt, 0);
+  payload.set(iv, salt.length);
+  payload.set(new Uint8Array(ciphertext), salt.length + iv.length);
+
+  const hashData = bufferToBase64Url(payload.buffer);
+  const fullUrl = window.location.origin + window.location.pathname + '#' + hashData;
+
+  // QR-Code rendern
+  const container = document.getElementById('qr-container');
+  container.innerHTML = '';
+  const canvas = document.createElement('canvas');
+  QRCodeLib.drawCanvas(fullUrl, canvas, 240);
+  container.appendChild(canvas);
+
+  document.getElementById('display-pin').innerText = pin;
+  window.lastGeneratedUrl = fullUrl;
+  document.getElementById('share-modal').style.display = 'flex';
+}
+
+function copyShareLink() {
+  if (window.lastGeneratedUrl) {
+    navigator.clipboard.writeText(window.lastGeneratedUrl).then(() => {
+      alert("Gesicherter Link in Zwischenablage kopiert!");
+    });
+  }
+}
+
+function closeModal() {
+  document.getElementById('share-modal').style.display = 'none';
+}
+
+// Entschlüsseln beim Öffnen eines Links mit Hash
+async function unlockDocument() {
+  const pin = document.getElementById('unlock-pin').value.trim();
+  const errEl = document.getElementById('unlock-err');
+  errEl.style.display = 'none';
+
+  if (!pin) return;
+
+  try {
+    const rawHash = window.location.hash.substring(1);
+    const buffer = base64UrlToBuffer(rawHash);
+    const bytes = new Uint8Array(buffer);
+
+    if (bytes.length < 28) throw new Error("Format ungültig");
+
+    const salt = bytes.slice(0, 16);
+    const iv = bytes.slice(16, 28);
+    const ciphertext = bytes.slice(28);
+
+    const key = await deriveKey(pin, salt);
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ciphertext);
+
+    const dec = new TextDecoder();
+    const data = JSON.parse(dec.decode(decrypted));
+
+    setFormData(data);
+
+    // Ansicht umschalten
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('eval-form').style.display = 'block';
+
+    // Formular-Felder schreibschützen (Read-Only für Empfänger)
+    document.querySelectorAll('input, select, textarea').forEach(el => el.setAttribute('disabled', 'true'));
+  } catch (e) {
+    console.error(e);
+    errEl.style.display = 'block';
+  }
+}
+
+function resetToNew() {
+  window.location.hash = '';
+  window.location.reload();
+}
+
+// Startup-Prüfung
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.location.hash && window.location.hash.length > 20) {
+    // Hash vorhanden: Gesperrten Modus aktivieren
+    document.getElementById('eval-form').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'block';
+  }
+});
+</script>
+
+</body>
+</html>
